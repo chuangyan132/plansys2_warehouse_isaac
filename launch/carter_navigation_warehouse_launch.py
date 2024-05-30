@@ -15,16 +15,19 @@ def generate_launch_description():
 
     map_dir = LaunchConfiguration(
         "map",
-        default=os.path.join(
-            package_dir, "maps", "carter_warehouse_navigation.yaml"
-        ),
+        # default=os.path.join(
+        #     package_dir, "maps", "carter_warehouse_navigation.yaml"
+        # ),
+
+        default = "/home/chuang/plansys2_ws/install/carter_navigation_warehouse/share/carter_navigation_warehouse/maps/carter_warehouse_navigation.yaml",
     )
 
     param_dir = LaunchConfiguration(
         "params_file",
-        default=os.path.join(
-            package_dir, "params", "carter_navigation_params.yaml"
-        ),
+        # default=os.path.join(
+        #     package_dir, "params", "carter_navigation_params.yaml"
+        # ),
+        default = "/home/chuang/plansys2_ws/install/carter_navigation_warehouse/share/carter_navigation_warehouse/params/carter_navigation_params.yaml",
     )
 
     nav2_bringup_launch_dir = os.path.join(get_package_share_directory("nav2_bringup"), "launch")
@@ -35,7 +38,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(
             get_package_share_directory("plansys2_bringup"), 
             "launch", 
-            "plansys2_bringup_launch.py")),
+            "plansys2_bringup_launch_monolithic.py")),
         launch_arguments={"model_file": os.path.join(
             package_dir, "pddl", "carter_navigation.pddl")}.items()
     )
@@ -48,9 +51,16 @@ def generate_launch_description():
     )
 
     nav2_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([nav2_bringup_launch_dir, "/bringup_launch.py"]),
+        PythonLaunchDescriptionSource(os.path.join(
+            nav2_bringup_launch_dir,
+            "bringup_launch.py")),
         launch_arguments={"map": map_dir, "use_sim_time": use_sim_time, "params_file": param_dir}.items(),
     )
+
+    # nav2_cmd = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([nav2_bringup_launch_dir, "/bringup_launch.py"]),
+    #     launch_arguments={"map": map_dir, "use_sim_time": use_sim_time, "params_file": param_dir}.items(),
+    # )
             
     move_cmd = Node(
         package='carter_navigation_warehouse',
@@ -93,8 +103,10 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     ld.add_action(planys2_cmd)
+
+    # ld.add_action(nav2_cmd)
     ld.add_action(rviz_cmd)
-    ld.add_action(nav2_cmd)
+    
     ld.add_action(move_cmd)
     ld.add_action(patrol_cmd)
     ld.add_action(pointcloud_to_laserscan_cmd)
